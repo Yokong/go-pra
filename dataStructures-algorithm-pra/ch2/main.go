@@ -10,8 +10,7 @@ func main() {
 	//a := []int{-1, -2, 3, 4, -1, 1, -3, -4, 5}
 	//max := maxSubSequenceSum(a)
 	//fmt.Println(max)
-	a := []int{1, 2, 3, 4, 5, 6, 10, 34}
-	fmt.Println(binarySearch(a, 10))
+	fmt.Println(highPow(2, 40))
 }
 
 // 最大子序列
@@ -42,4 +41,14 @@ func binarySearch(a []int, target int) int {
 		}
 	}
 	return NotFound
+}
+
+func highPow(x int64, n uint) int64 {
+	if n == 0 { return 1 }
+	if n == 1 { return x }
+	if n % 2 == 0 {
+		return highPow(x * x, n / 2)
+	} else {
+		return highPow(x * x, n / 2) * x
+	}
 }
