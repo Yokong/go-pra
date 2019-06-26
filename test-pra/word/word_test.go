@@ -55,3 +55,31 @@ func TestRandomPalindromes(t *testing.T) {
 		}
 	}
 }
+
+// func BenchmarkIsPalindrome(b *testing.B) {
+// 	for i := 0; i < b.N; i++ {
+// 		IsPalindrome("A man, a plan, a canal: Panama")
+// 	}
+// }
+
+func isPalindromeBase(b *testing.B, size int) {
+	for i := 0; i < size; i++ {
+		IsPalindrome("A man, a plan, a canal: Panama")
+	}
+}
+
+func BenchmarkIsPalindrome10(b *testing.B) {
+	isPalindromeBase(b, 10)
+}
+
+func BenchmarkIsPalindrome100(b *testing.B) {
+	isPalindromeBase(b, 100)
+}
+
+func BenchmarkIsPalindrome10000(b *testing.B) {
+	isPalindromeBase(b, 10000)
+}
+
+func BenchmarkIsPalindrome1000000(b *testing.B) {
+	isPalindromeBase(b, 1000000)
+}
