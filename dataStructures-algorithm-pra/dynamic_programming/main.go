@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func intMax(x, y int) int {
 	if x > y {
@@ -52,8 +54,27 @@ func maxSubArray(nums []int) int {
 	return max_res
 }
 
+// 4. 找零钱
+func coinChange(coins []int, amount int) int {
+	var dp []int
+	for i := 0; i <= amount; i++ {
+		dp = append(dp, -1)
+	}
+	dp[0] = 0
+	for i := 1; i <= amount; i++ {
+		for j := 0; j < len(coins); j++ {
+			if i-coins[j] >= 0 && dp[i-coins[j]] != -1 {
+				if dp[i] == -1 || dp[i] > dp[i-coins[j]]+1 {
+					dp[i] = dp[i-coins[j]] + 1
+				}
+			}
+		}
+	}
+
+	return dp[amount]
+}
+
 func main() {
-	a := []int{-2, 1, -3, 4, -1, 2, 1, -5, 4}
-	b := maxSubArray(a)
-	fmt.Println(b)
+	a := []int{1, 2, 5, 7, 10}
+	fmt.Println(coinChange(a, 19))
 }
