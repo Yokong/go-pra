@@ -1,11 +1,16 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func intMax(x, y int) int {
 	if x > y {
+		return x
+	}
+	return y
+}
+
+func intMin(x, y int) int {
+	if x < y {
 		return x
 	}
 	return y
@@ -74,7 +79,26 @@ func coinChange(coins []int, amount int) int {
 	return dp[amount]
 }
 
+// 5. 三角形
+func minimumTotal(triangle [][]int) int {
+	minNums := make([]int, len(triangle[len(triangle)-1]))
+	for i := 0; i < len(triangle[len(triangle)-1]); i++ {
+		minNums[i] = triangle[len(triangle)-1][i]
+	}
+	for i := len(triangle) - 2; i >= 0; i-- {
+		for j := 0; j <= i; j++ {
+			minNums[j] = intMin(minNums[j], minNums[j+1]) + triangle[i][j]
+		}
+	}
+	return minNums[0]
+}
+
 func main() {
-	a := []int{1, 2, 5, 7, 10}
-	fmt.Println(coinChange(a, 19))
+	a := [][]int{
+		{3},
+		{2, 1},
+		{5, 1, 4},
+	}
+	b := minimumTotal(a)
+	fmt.Println(b)
 }
