@@ -27,6 +27,23 @@ func climbStairs(n int) int {
 	return dp[n]
 }
 
+func fib(n int) int {
+	a, b := 1, 2
+	if n == 0 {
+		return 0
+	}
+	if n == 1 {
+		return a
+	}
+	if n == 2 {
+		return b
+	}
+	for i := 3; i <= n; i++ {
+		a, b = b, a+b
+	}
+	return b
+}
+
 // 2. 打家劫舍
 func rob(nums []int) int {
 	if len(nums) == 0 {
@@ -94,11 +111,6 @@ func minimumTotal(triangle [][]int) int {
 }
 
 func main() {
-	a := [][]int{
-		{3},
-		{2, 1},
-		{5, 1, 4},
-	}
-	b := minimumTotal(a)
-	fmt.Println(b)
+	a := fib(0)
+	fmt.Println(a)
 }
