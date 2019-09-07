@@ -66,14 +66,14 @@ func rob(nums []int) int {
 func maxSubArray(nums []int) int {
 	dp := make([]int, len(nums))
 	dp[0] = nums[0]
-	max_res := dp[0]
+	maxRes := dp[0]
 	for i := 1; i < len(nums); i++ {
 		dp[i] = intMax(dp[i-1]+nums[i], nums[i])
-		if dp[i] > max_res {
-			max_res = dp[i]
+		if dp[i] > maxRes {
+			maxRes = dp[i]
 		}
 	}
-	return max_res
+	return maxRes
 }
 
 // 4. 找零钱
