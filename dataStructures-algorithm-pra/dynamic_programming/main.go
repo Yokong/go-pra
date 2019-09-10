@@ -110,7 +110,31 @@ func minimumTotal(triangle [][]int) int {
 	return minNums[0]
 }
 
+// 6. 最长上升子序列
+func lengthOfLIS(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+
+	dp := make([]int, len(nums))
+	dp[0] = 1
+	lis := 1
+	for i := 1; i < len(dp); i++ {
+		dp[i] = 1
+		for j := 0; j < i; j++ {
+			if nums[i] > nums[j] && dp[i] < dp[j]+1 {
+				dp[i] = dp[j] + 1
+			}
+		}
+		if lis < dp[i] {
+			lis = dp[i]
+		}
+	}
+	return lis
+}
+
 func main() {
-	a := fib(0)
-	fmt.Println(a)
+	a := []int{1, 3, 2, 3, 1, 4}
+	b := lengthOfLIS(a)
+	fmt.Println(b)
 }
