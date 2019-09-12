@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func intMax(x, y int) int {
 	if x > y {
@@ -133,8 +135,31 @@ func lengthOfLIS(nums []int) int {
 	return lis
 }
 
+func lengthOfLISV2(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+
+	s := make([]int, len(nums))
+	s[0] = nums[0]
+	for i := 1; i < len(nums); i++ {
+		if nums[i] > s[len(s)-1] {
+			s = append(s, nums[i])
+		} else {
+			for j := 0; j < len(s); j++ {
+				if s[j] >= nums[i] {
+					s[j] = nums[i]
+				}
+			}
+		}
+	}
+	return len(s)
+}
+
 func main() {
-	a := []int{1, 3, 2, 3, 1, 4}
+	a := []int{}
 	b := lengthOfLIS(a)
+	c := lengthOfLISV2(a)
 	fmt.Println(b)
+	fmt.Println(c)
 }
