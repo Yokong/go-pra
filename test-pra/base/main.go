@@ -41,6 +41,23 @@ const (
 	months = "JanFebMarAprMayJunJulAugSepOctNovDec"
 )
 
+func reverseStr(str string) string {
+	a := []byte(str)
+	for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
+		a[i], a[j] = a[j], a[i]
+	}
+	return string(a)
+}
+
+func reverseStrV2(str string) string {
+	a := []byte(str)
+	var b []byte
+	for i := len(str) - 1; i >= 0; i-- {
+		b = append(b, a[i])
+	}
+	return string(b)
+}
+
 func main() {
 	// t := time.Now()
 	// yy, mm, dd := t.Date()
@@ -53,6 +70,7 @@ func main() {
 	// fmt.Println(mon)
 	// fmt.Println(yy, dd)
 
-	p := Person{Name: "Yoko"}
-	fmt.Println(p)
+	a := "yoko"
+	b := reverseStrV2(a)
+	fmt.Println(b)
 }
