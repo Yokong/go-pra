@@ -33,11 +33,23 @@ func fib2(x int) int {
 }
 
 func main() {
-	go spinner(100 * time.Millisecond)
-	const n = 45
-	start := time.Now()
-	fibN := fib(n)
-	end := time.Since(start)
-	fmt.Printf("\rFibonacci(%d) = %d\n", n, fibN)
-	fmt.Println(end)
+	naturals := make(chan int)
+	squares := make(chan int)
+
+	go func() {
+		for x := 0; ; x++ {
+			naturals <- x
+		}
+	}()
+
+	go func() {
+		for {
+			x := <-naturals
+			squares <- x * x
+		}
+	}()
+
+	for {
+		fmt.Println(<-squares)
+	}
 }
