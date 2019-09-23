@@ -135,31 +135,28 @@ func lengthOfLIS(nums []int) int {
 	return lis
 }
 
-func lengthOfLISV2(nums []int) int {
-	if len(nums) == 0 {
-		return 0
+// 最小路径和
+func minPathSum(grid [][]int) int {
+	for i := 1; i < len(grid); i++ {
+		grid[i][0] += grid[i-1][0]
 	}
-
-	s := make([]int, len(nums))
-	s[0] = nums[0]
-	for i := 1; i < len(nums); i++ {
-		if nums[i] > s[len(s)-1] {
-			s = append(s, nums[i])
-		} else {
-			for j := 0; j < len(s); j++ {
-				if s[j] >= nums[i] {
-					s[j] = nums[i]
-				}
-			}
+	for i := 1; i < len(grid[0]); i++ {
+		grid[0][i] += grid[0][i-1]
+	}
+	for i := 1; i < len(grid); i++ {
+		for j := 1; j < len(grid[0]); j++ {
+			grid[i][j] += intMin(grid[i-1][j], grid[i][j-1])
 		}
 	}
-	return len(s)
+	return grid[len(grid)-1][len(grid[0])-1]
 }
 
 func main() {
-	a := []int{}
-	b := lengthOfLIS(a)
-	c := lengthOfLISV2(a)
+	a := [][]int{
+		{1, 3, 1},
+		{1, 5, 1},
+		{4, 2, 1},
+	}
+	b := minPathSum(a)
 	fmt.Println(b)
-	fmt.Println(c)
 }
