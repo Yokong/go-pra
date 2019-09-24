@@ -7,8 +7,8 @@ import (
 type Elem int
 
 type Tree struct {
-	E Elem
-	Left *Tree
+	E     Elem
+	Left  *Tree
 	Right *Tree
 }
 
