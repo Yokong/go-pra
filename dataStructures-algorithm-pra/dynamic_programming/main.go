@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func intMax(x, y int) int {
 	if x > y {
@@ -133,8 +135,52 @@ func lengthOfLIS(nums []int) int {
 	return lis
 }
 
+// 最小路径和
+func minPathSum(grid [][]int) int {
+	for i := 1; i < len(grid); i++ {
+		grid[i][0] += grid[i-1][0]
+	}
+	for i := 1; i < len(grid[0]); i++ {
+		grid[0][i] += grid[0][i-1]
+	}
+	for i := 1; i < len(grid); i++ {
+		for j := 1; j < len(grid[0]); j++ {
+			grid[i][j] += intMin(grid[i-1][j], grid[i][j-1])
+		}
+	}
+	return grid[len(grid)-1][len(grid[0])-1]
+}
+
+// 地牢游戏
+func calculateMinimumHP(dungeon [][]int) int {
+	t := dungeon[len(dungeon)-1][len(dungeon[0])-1]
+	dungeon[len(dungeon)-1][len(dungeon[0])-1] = intMax(1, 1-t)
+
+	for i := len(dungeon) - 2; i >= 0; i-- {
+		last := dungeon[i+1][len(dungeon)-1]
+		cur := dungeon[i][len(dungeon)-1]
+		dungeon[i][len(dungeon[i])-1] = intMax(1, last-cur)
+	}
+	for i := len(dungeon[0]) - 2; i >= 0; i-- {
+		last := dungeon[len(dungeon)-1][i+1]
+		cur := dungeon[len(dungeon)-1][i]
+		dungeon[len(dungeon)-1][i] = intMax(1, last-cur)
+	}
+	for i := len(dungeon) - 2; i >= 0; i-- {
+		for j := len(dungeon[0]) - 2; j >= 0; j-- {
+			m := intMin(dungeon[i+1][j], dungeon[i][j+1])
+			dungeon[i][j] = intMax(1, m-dungeon[i][j])
+		}
+	}
+	return dungeon[0][0]
+}
+
 func main() {
-	a := []int{1, 3, 2, 3, 1, 4}
-	b := lengthOfLIS(a)
+	a := [][]int{
+		{-2, -3, 3},
+		{-5, -10, 1},
+		{10, 30, -5},
+	}
+	b := calculateMinimumHP(a)
 	fmt.Println(b)
 }

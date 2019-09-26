@@ -7,7 +7,7 @@ const (
 )
 
 type Stack struct {
-	Top int
+	Top  int
 	Elem []interface{}
 }
 

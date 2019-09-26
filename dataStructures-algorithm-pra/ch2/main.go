@@ -29,7 +29,7 @@ func maxSubSequenceSum(a []int) int {
 
 // 通过二分查找元素下标
 func binarySearch(a []int, target int) int {
-	low, mid, high := 0, 0, len(a) - 1
+	low, mid, high := 0, 0, len(a)-1
 	for low <= high {
 		mid = (low + high) / 2
 		if a[mid] < target {
@@ -44,11 +44,15 @@ func binarySearch(a []int, target int) int {
 }
 
 func highPow(x int64, n uint) int64 {
-	if n == 0 { return 1 }
-	if n == 1 { return x }
-	if n % 2 == 0 {
-		return highPow(x * x, n / 2)
+	if n == 0 {
+		return 1
+	}
+	if n == 1 {
+		return x
+	}
+	if n%2 == 0 {
+		return highPow(x*x, n/2)
 	} else {
-		return highPow(x * x, n / 2) * x
+		return highPow(x*x, n/2) * x
 	}
 }
