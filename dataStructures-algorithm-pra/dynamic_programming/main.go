@@ -156,34 +156,29 @@ func calculateMinimumHP(dungeon [][]int) int {
 	rowLen := len(dungeon)
 	colLen := len(dungeon[0])
 
-	// 初始化dp数组
-	dp := make([][]int, rowLen)
-	for i := 0; i < rowLen; i++ {
-		dp[i] = make([]int, colLen)
-	}
-
 	for i := rowLen - 1; i >= 0; i-- {
 		for j := colLen - 1; j >= 0; j-- {
 			if i == rowLen-1 && j == colLen-1 {
-				dp[i][j] = intMax(1, 1-dungeon[i][j])
+				dungeon[i][j] = intMax(1, 1-dungeon[i][j])
 			} else if i == rowLen-1 {
-				dp[i][j] = intMax(1, dp[i][j+1]-dungeon[i][j])
+				dungeon[i][j] = intMax(1, dungeon[i][j+1]-dungeon[i][j])
 			} else if j == colLen-1 {
-				dp[i][j] = intMax(1, dp[i+1][j]-dungeon[i][j])
+				dungeon[i][j] = intMax(1, dungeon[i+1][j]-dungeon[i][j])
 			} else {
-				m := intMin(dp[i][j+1], dp[i+1][j])
-				dp[i][j] = intMax(1, m-dungeon[i][j])
+				m := intMin(dungeon[i][j+1], dungeon[i+1][j])
+				dungeon[i][j] = intMax(1, m-dungeon[i][j])
 			}
 		}
 	}
 
-	return dp[0][0]
+	return dungeon[0][0]
 }
 
 func main() {
 	a := [][]int{
-		{2},
-		{1},
+		{-2, -3, 3},
+		{-5, -10, 1},
+		{10, 30, -5},
 	}
 	b := calculateMinimumHP(a)
 	fmt.Println(b)
