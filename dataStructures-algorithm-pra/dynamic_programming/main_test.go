@@ -23,3 +23,15 @@ func BenchmarkLengthOfLIS(b *testing.B) {
 		lengthOfLIS(a)
 	}
 }
+
+func BenchmarkDungeon(b *testing.B) {
+	a := [][]int{
+		{-2, -3, 3},
+		{-5, -10, 1},
+		{10, 30, -5},
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		calculateMinimumHP(a)
+	}
+}
