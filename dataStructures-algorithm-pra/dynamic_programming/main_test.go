@@ -23,11 +23,3 @@ func BenchmarkLengthOfLIS(b *testing.B) {
 		lengthOfLIS(a)
 	}
 }
-
-func BenchmarkLengthOfLISV2(b *testing.B) {
-	a := []int{1, 2, 3, 1}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		lengthOfLISV2(a)
-	}
-}

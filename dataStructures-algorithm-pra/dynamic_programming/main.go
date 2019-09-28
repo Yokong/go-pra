@@ -153,33 +153,37 @@ func minPathSum(grid [][]int) int {
 
 // 地牢游戏
 func calculateMinimumHP(dungeon [][]int) int {
-	t := dungeon[len(dungeon)-1][len(dungeon[0])-1]
-	dungeon[len(dungeon)-1][len(dungeon[0])-1] = intMax(1, 1-t)
+	rowLen := len(dungeon)
+	colLen := len(dungeon[0])
 
-	for i := len(dungeon) - 2; i >= 0; i-- {
-		last := dungeon[i+1][len(dungeon)-1]
-		cur := dungeon[i][len(dungeon)-1]
-		dungeon[i][len(dungeon[i])-1] = intMax(1, last-cur)
+	// 初始化dp数组
+	dp := make([][]int, rowLen)
+	for i := 0; i < rowLen; i++ {
+		dp[i] = make([]int, colLen)
 	}
-	for i := len(dungeon[0]) - 2; i >= 0; i-- {
-		last := dungeon[len(dungeon)-1][i+1]
-		cur := dungeon[len(dungeon)-1][i]
-		dungeon[len(dungeon)-1][i] = intMax(1, last-cur)
-	}
-	for i := len(dungeon) - 2; i >= 0; i-- {
-		for j := len(dungeon[0]) - 2; j >= 0; j-- {
-			m := intMin(dungeon[i+1][j], dungeon[i][j+1])
-			dungeon[i][j] = intMax(1, m-dungeon[i][j])
+
+	for i := rowLen - 1; i >= 0; i-- {
+		for j := colLen - 1; j >= 0; j-- {
+			if i == rowLen-1 && j == colLen-1 {
+				dp[i][j] = intMax(1, 1-dungeon[i][j])
+			} else if i == rowLen-1 {
+				dp[i][j] = intMax(1, dp[i][j+1]-dungeon[i][j])
+			} else if j == colLen-1 {
+				dp[i][j] = intMax(1, dp[i+1][j]-dungeon[i][j])
+			} else {
+				m := intMin(dp[i][j+1], dp[i+1][j])
+				dp[i][j] = intMax(1, m-dungeon[i][j])
+			}
 		}
 	}
-	return dungeon[0][0]
+
+	return dp[0][0]
 }
 
 func main() {
 	a := [][]int{
-		{-2, -3, 3},
-		{-5, -10, 1},
-		{10, 30, -5},
+		{2},
+		{1},
 	}
 	b := calculateMinimumHP(a)
 	fmt.Println(b)
