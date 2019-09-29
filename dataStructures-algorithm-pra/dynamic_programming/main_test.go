@@ -35,3 +35,15 @@ func BenchmarkDungeon(b *testing.B) {
 		calculateMinimumHP(a)
 	}
 }
+
+func BenchmarkIsPalindrome(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		isPalindrome("asdffdsa")
+	}
+}
+
+func BenchmarkIsPalindromeV2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		isPalindromeV2("asdffdsa")
+	}
+}

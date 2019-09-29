@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func intMax(x, y int) int {
 	if x > y {
@@ -174,12 +172,31 @@ func calculateMinimumHP(dungeon [][]int) int {
 	return dungeon[0][0]
 }
 
-func main() {
-	a := [][]int{
-		{-2, -3, 3},
-		{-5, -10, 1},
-		{10, 30, -5},
+// 判断s是否为回文
+func isPalindrome(s string) bool {
+	for i, j := 0, len(s)-1; i <= j; i, j = i+1, j-1 {
+		if s[i] != s[j] {
+			return false
+		}
 	}
-	b := calculateMinimumHP(a)
+	return true
+}
+
+func isPalindromeV2(s string) bool {
+	l := len(s) - 1
+	for i := 0; i <= l/2; i++ {
+		if s[i] != s[l-i] {
+			return false
+		}
+	}
+	return true
+}
+
+func main() {
+	s := "asdffdsaa"
+	a := isPalindrome(s)
+	fmt.Println(a)
+
+	b := isPalindromeV2(s)
 	fmt.Println(b)
 }
