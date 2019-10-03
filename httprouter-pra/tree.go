@@ -28,12 +28,102 @@ type node struct {
 	priority  uint32
 }
 
-// func (n *node) addRoute(method, path, string, handle Handle) {
-// 	n.priority++
-// 	if len(n.path) > 0 || len(n.children) > 0 {
-// 	WALK:
-// 	}
-// }
+func (n *node) incrementChildPrio(i int) int {
+	n.children[i].priority++
+	prio := n.children[i].priority
+
+	for j := i - 1; j >= 0 && n.children[j].priority < prio; j-- {
+		tmpN := n.children[j]
+		n.children[j] = n.children[i]
+		n.children[i] = tmpN
+		tmpI := n.indices[j]
+		n.indices[j] = n.indices[i]
+		n.indices[i] = tmpI
+		i--
+	}
+	return i
+}
+
+func (n *node) addRoute(method, path string, handle Handle) {
+	n.priority++
+	if len(n.path) > 0 || len(n.children) > 0 {
+	WALK:
+		for {
+			i := 0
+			for j := min(len(path), len(n.path)); i < j && path[i] == n.path[i]; i++ {
+			}
+
+			if i < len(n.path) {
+				n.children = []*node{&node{
+					path:      n.path[i:],
+					indices:   n.indices,
+					children:  n.children,
+					handle:    n.handle,
+					wildChild: n.wildChild,
+					priority:  n.priority - 1,
+				}}
+			}
+
+			if i < len(path) {
+				path = path[i:]
+
+				if n.wildChild {
+					n = n.children[0]
+					n.priority++
+
+					if len(path) >= len(n.path) && n.path == path[:len(n.path)] {
+						if len(n.path) >= len(path) || path[len(n.path)] == '/' {
+							continue WALK
+						}
+					}
+
+					panic("conflict with wildcard route")
+				}
+
+				c := path[0]
+
+				if n.nType == param && c == '/' && len(n.children) == 1 {
+					n = n.children[0]
+					n.priority++
+					continue WALK
+				}
+
+				for i, index := range n.indices {
+					if c == index {
+						i = n.incrementChildPrio(i)
+						n = n.children[i]
+						continue WALK
+					}
+				}
+
+				if c != ':' && c != '*' {
+					n.indices = append(n.indices, c)
+					child := &node{}
+					n.children = append(n.children, child)
+
+					n.incrementChildPrio(len(n.indices) - 1)
+					n = child
+				}
+				n.insertChild(method, path, handle)
+				return
+			} else if i == len(path) {
+				if n.handle == nil {
+					n.handle = map[string]Handle{
+						method: handle,
+					}
+				} else {
+					if n.handle[method] != nil {
+						panic("a Handle is already registered for this method at this path")
+					}
+					n.handle[method] = handle
+				}
+			}
+			return
+		}
+	} else {
+		n.insertChild(method, path, handle)
+	}
+}
 
 func (n *node) insertChild(method, path string, handle Handle) {
 	var offset int

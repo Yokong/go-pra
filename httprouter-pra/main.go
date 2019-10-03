@@ -7,8 +7,7 @@ import (
 
 func main() {
 	n := &node{}
-	n.insertChild("POST", "/api/user/register", Index)
-	n.insertChild("GET", "/api/user/register", Index)
+	n.addRoute("POST", "/api/user/login", Index)
 	fmt.Println(n)
 }
 
