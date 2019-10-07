@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"strings"
+	"unicode"
+)
 
 func min(a, b int) int {
 	if a < b {
@@ -10,7 +13,6 @@ func min(a, b int) int {
 }
 
 type nodeType uint8
-type Handle func(http.ResponseWriter, *http.Request, map[string]string)
 
 const (
 	static   nodeType = 0
@@ -128,12 +130,16 @@ func (n *node) addRoute(method, path string, handle Handle) {
 func (n *node) insertChild(method, path string, handle Handle) {
 	var offset int
 
+	// find prefix until first wildcard (beginning with ':'' or '*'')
 	for i, j := 0, len(path); i < j; i++ {
 		if c := path[i]; c == ':' || c == '*' {
+			// Check if this Node existing children which would be
+			// unreachable if we insert the wildcard here
 			if len(n.children) > 0 {
 				panic("wildcard route conflicts with existing children")
 			}
 
+			// find wildcard end (either '/' or path end)
 			k := i + 1
 			for k < j && path[k] != '/' {
 				k++
@@ -143,7 +149,8 @@ func (n *node) insertChild(method, path string, handle Handle) {
 				panic("wildcards must be named with a non-empty name")
 			}
 
-			if c == ':' {
+			if c == ':' { // param
+				// split path at the beginning of the wildcard
 				if i > 0 {
 					n.path = path[offset:i]
 					offset = i
@@ -157,15 +164,19 @@ func (n *node) insertChild(method, path string, handle Handle) {
 				n = child
 				n.priority++
 
+				// if the path doesn't end with the wildcard, then there will be
+				// another non-wildcard subpath starting with '/'
 				if k < j {
 					n.path = path[offset:k]
 					offset = k
+
 					child := &node{}
 					n.children = []*node{child}
 					n = child
 					n.priority++
 				}
-			} else {
+
+			} else { // catchAll
 				if len(path) != k {
 					panic("catch-all routes are only allowed at the end of the path")
 				}
@@ -174,6 +185,7 @@ func (n *node) insertChild(method, path string, handle Handle) {
 					panic("catch-all conflicts with existing handle for the path segment root")
 				}
 
+				// currently fixed width 1 for '/'
 				i--
 				if path[i] != '/' {
 					panic("no / before catch-all")
@@ -181,6 +193,7 @@ func (n *node) insertChild(method, path string, handle Handle) {
 
 				n.path = path[offset:i]
 
+				// first node: catchAll node with empty path
 				child := &node{
 					wildChild: true,
 					nType:     catchAll,
@@ -190,6 +203,7 @@ func (n *node) insertChild(method, path string, handle Handle) {
 				n = child
 				n.priority++
 
+				// second node: node holding the variable
 				child = &node{
 					path: path[i:],
 					handle: map[string]Handle{
@@ -205,8 +219,217 @@ func (n *node) insertChild(method, path string, handle Handle) {
 		}
 	}
 
+	// insert remaining path part and handle to the leaf
 	n.path = path[offset:]
 	n.handle = map[string]Handle{
 		method: handle,
 	}
+}
+
+func (n *node) getValue(method, path string) (handle Handle, vars map[string]string, tsr bool) {
+walk: // Outer loop for walking the tree
+	for {
+		if len(path) > len(n.path) {
+			if path[:len(n.path)] == n.path {
+				path = path[len(n.path):]
+				// If this node does not have a wildcard (param or catchAll)
+				// child,  we can just look up the next child node and continue
+				// to walk down the tree
+				if !n.wildChild {
+					c := path[0]
+					for i, index := range n.indices {
+						if c == index {
+							n = n.children[i]
+							continue walk
+						}
+					}
+
+					// Nothing found.
+					// We can recommend to redirect to the same URL without a
+					// trailing slash if a leaf exists for that path.
+					tsr = (path == "/" && n.handle[method] != nil)
+					return
+
+				}
+
+				// handle wildcard child
+				n = n.children[0]
+				switch n.nType {
+				case param:
+					// find param end (either '/' or path end)
+					k := 0
+					for k < len(path) && path[k] != '/' {
+						k++
+					}
+
+					// save param value
+					if vars == nil {
+						vars = map[string]string{
+							n.path[1:]: path[:k],
+						}
+					} else {
+						vars[n.path[1:]] = path[:k]
+					}
+
+					// we need to go deeper!
+					if k < len(path) {
+						if len(n.children) > 0 {
+							path = path[k:]
+							n = n.children[0]
+							continue walk
+						}
+
+						// ... but we can't
+						tsr = (len(path) == k+1)
+						return
+					}
+
+					if handle = n.handle[method]; handle != nil {
+						return
+					} else if len(n.children) == 1 {
+						// No handle found. Check if a handle for this path + a
+						// trailing slash exists for TSR recommendation
+						n = n.children[0]
+						tsr = (n.path == "/" && n.handle[method] != nil)
+					}
+
+					// TODO: handle HTTP Error 405 - Method Not Allowed
+					// Return available methods
+					return
+
+				case catchAll:
+					// save catchAll value
+					if vars == nil {
+						vars = map[string]string{
+							n.path[2:]: path,
+						}
+					} else {
+						vars[n.path[2:]] = path
+					}
+
+					handle = n.handle[method]
+					return
+
+				default:
+					panic("Unknown node type")
+				}
+			}
+		} else if path == n.path {
+			// We should have reached the node containing the handle.
+			// Check if this node has a handle registered for the given method.
+			if handle = n.handle[method]; handle != nil {
+				return
+			}
+
+			// No handle found. Check if a handle for this path + a
+			// trailing slash exists for trailing slash recommendation
+			for i, index := range n.indices {
+				if index == '/' {
+					n = n.children[i]
+					tsr = (n.path == "/" && n.handle[method] != nil) ||
+						(n.nType == catchAll && n.children[0].handle[method] != nil)
+					return
+				}
+			}
+
+			// TODO: handle HTTP Error 405 - Method Not Allowed
+			// Return available methods
+			return
+		}
+
+		// Nothing found. We can recommend to redirect to the same URL with an
+		// extra trailing slash if a leaf exists for that path
+		tsr = (path == "/") ||
+			(n.path[len(path)] == '/' && path == n.path[:len(n.path)-1] && n.handle[method] != nil)
+		return
+	}
+}
+
+func (n *node) findCaseInsensitivePath(method, path string, fixTrailingSlash bool) (ciPath []byte, found bool) {
+	ciPath = make([]byte, 0, len(path)+1)
+
+	for len(path) >= len(n.path) && strings.ToLower(path[:len(n.path)]) == strings.ToLower(n.path) {
+		path = path[len(n.path):]
+		ciPath = append(ciPath, n.path...)
+
+		if len(path) > 0 {
+			if !n.wildChild {
+				r := unicode.ToLower(rune(path[0]))
+				for i, index := range n.indices {
+					if r == unicode.ToLower(rune(index)) {
+						out, found := n.children[i].findCaseInsensitivePath(method, path, fixTrailingSlash)
+						if found {
+							return append(ciPath, out...), true
+						}
+					}
+				}
+				found = (fixTrailingSlash && path == "/" && n.handle[method] != nil)
+				return
+			} else {
+				n = n.children[0]
+				switch n.nType {
+				case param:
+					k := 0
+					for k < len(path) && path[k] != '/' {
+						k++
+					}
+					ciPath = append(ciPath, path[:k]...)
+					if k < len(path) {
+						if len(n.children) > 0 {
+							path = path[k:]
+							n = n.children[0]
+							continue
+						} else {
+							if fixTrailingSlash && len(path) == k+1 {
+								return ciPath, true
+							}
+							return
+						}
+					}
+
+					if n.handle[method] != nil {
+						return ciPath, true
+					} else if fixTrailingSlash && len(n.children) == 1 {
+						n = n.children[0]
+						if n.path == "/" && n.handle[method] != nil {
+							return append(ciPath, '/'), true
+						}
+					}
+					return
+				case catchAll:
+					return append(ciPath, path...), true
+				default:
+					panic("Unknown node type")
+				}
+			}
+		} else {
+			if n.handle[method] != nil {
+				return ciPath, true
+			}
+			if fixTrailingSlash {
+				for i, index := range n.indices {
+					if index == '/' {
+						n = n.children[i]
+						if (n.path == "/" && n.handle[method] != nil) ||
+							(n.nType == catchAll && n.children[0].handle[method] != nil) {
+							return append(ciPath, '/'), true
+						}
+						return
+					}
+				}
+			}
+			return
+		}
+	}
+	if fixTrailingSlash {
+		if path == "/" {
+			return ciPath, true
+		}
+		if len(path)+1 == len(n.path) && n.path[len(path)] == '/' &&
+			strings.ToLower(path) == strings.ToLower(n.path[:len(path)]) &&
+			n.handle[method] != nil {
+			return append(ciPath, n.path...), true
+		}
+	}
+	return
 }
