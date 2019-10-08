@@ -12,12 +12,9 @@ func main() {
 	root.Left = &tree.TreeNode{
 		Val: 5,
 	}
-	root1 := &tree.TreeNode{
-		Val: 10,
-	}
-	root1.Left = &tree.TreeNode{
-		Val: 2,
-	}
-	a := tree.IsSameTree(root, root1)
+	// root.Right = &tree.TreeNode{
+	// 	Val: 5,
+	// }
+	a := tree.IsSymmetric(root)
 	fmt.Println(a)
 }
