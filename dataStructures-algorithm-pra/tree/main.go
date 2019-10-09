@@ -7,14 +7,14 @@ import (
 
 func main() {
 	root := &tree.TreeNode{
-		Val: 10,
+		Val: 1,
 	}
 	root.Left = &tree.TreeNode{
-		Val: 5,
+		Val: 2,
 	}
-	// root.Right = &tree.TreeNode{
-	// 	Val: 5,
-	// }
-	a := tree.IsSymmetric(root)
+	root.Right = &tree.TreeNode{
+		Val: 3,
+	}
+	a := tree.InorderTraversal(root)
 	fmt.Println(a)
 }

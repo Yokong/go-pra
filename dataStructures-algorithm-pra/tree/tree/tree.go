@@ -51,3 +51,24 @@ func MaxDepth(root *TreeNode) int {
 	right := MaxDepth(root.Right)
 	return max(left, right) + 1
 }
+
+// 二叉树中序遍历
+func InorderTraversal(root *TreeNode) []int {
+	var res []int
+	var stack []*TreeNode
+
+	for root != nil || len(stack) > 0 {
+		for root != nil {
+			stack = append(stack, root)
+			root = root.Left
+		}
+
+		n := len(stack) - 1
+		root = stack[n]
+		stack = stack[:n]
+
+		res = append(res, root.Val)
+		root = root.Right
+	}
+	return res
+}
