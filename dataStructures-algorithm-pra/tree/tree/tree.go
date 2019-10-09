@@ -73,6 +73,32 @@ func InorderTraversal(root *TreeNode) []int {
 	return res
 }
 
+// 二叉树前序遍历
+func PreorderTraversal(root *TreeNode) []int {
+	var res []int
+	if root == nil {
+		return res
+	}
+
+	stack := []*TreeNode{root}
+	for len(stack) > 0 {
+		n := len(stack) - 1
+		root = stack[n]
+		stack = stack[:n]
+
+		if root != nil {
+			res = append(res, root.Val)
+			if root.Right != nil {
+				stack = append(stack, root.Right)
+			}
+			if root.Left != nil {
+				stack = append(stack, root.Left)
+			}
+		}
+	}
+	return res
+}
+
 // 验证二叉搜索树
 func IsValidBST(root *TreeNode) bool {
 	var stack []*TreeNode
@@ -85,7 +111,7 @@ func IsValidBST(root *TreeNode) bool {
 		}
 
 		n := len(stack) - 1
-		root := stack[n]
+		root = stack[n]
 		stack = stack[:n]
 
 		if root.Val <= min {
