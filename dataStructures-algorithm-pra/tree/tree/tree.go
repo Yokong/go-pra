@@ -52,6 +52,27 @@ func MaxDepth(root *TreeNode) int {
 	return max(left, right) + 1
 }
 
+// 二叉树前序遍历
+func PreorderTraversal(root *TreeNode) []int {
+	var res []int
+	var stack []*TreeNode
+
+	for root != nil || len(stack) > 0 {
+		for root != nil {
+			res = append(res, root.Val)
+			stack = append(stack, root)
+			root = root.Left
+		}
+
+		n := len(stack) - 1
+		root = stack[n]
+		stack = stack[:n]
+
+		root = root.Right
+	}
+	return res
+}
+
 // 二叉树中序遍历
 func InorderTraversal(root *TreeNode) []int {
 	var res []int
@@ -69,32 +90,6 @@ func InorderTraversal(root *TreeNode) []int {
 
 		res = append(res, root.Val)
 		root = root.Right
-	}
-	return res
-}
-
-// 二叉树前序遍历
-func PreorderTraversal(root *TreeNode) []int {
-	var res []int
-	if root == nil {
-		return res
-	}
-
-	stack := []*TreeNode{root}
-	for len(stack) > 0 {
-		n := len(stack) - 1
-		root = stack[n]
-		stack = stack[:n]
-
-		if root != nil {
-			res = append(res, root.Val)
-			if root.Right != nil {
-				stack = append(stack, root.Right)
-			}
-			if root.Left != nil {
-				stack = append(stack, root.Left)
-			}
-		}
 	}
 	return res
 }
