@@ -17,4 +17,5 @@ func main() {
 	}
 	a := tree.InorderTraversal(root)
 	fmt.Println(a)
+	fmt.Println(-1 << 63)
 }

@@ -72,3 +72,27 @@ func InorderTraversal(root *TreeNode) []int {
 	}
 	return res
 }
+
+// 验证二叉搜索树
+func IsValidBST(root *TreeNode) bool {
+	var stack []*TreeNode
+
+	min := -1 << 63
+	for root != nil || len(stack) > 0 {
+		for root != nil {
+			stack = append(stack, root)
+			root = root.Left
+		}
+
+		n := len(stack) - 1
+		root := stack[n]
+		stack = stack[:n]
+
+		if root.Val <= min {
+			return false
+		}
+		min = root.Val
+		root = root.Right
+	}
+	return true
+}
