@@ -192,11 +192,28 @@ func isPalindromeV2(s string) bool {
 	return true
 }
 
-func main() {
-	s := "asdffdsaa"
-	a := isPalindrome(s)
-	fmt.Println(a)
+// 最长回文子串
+func longestPalindrome(s string) string {
+	if isPalindrome(s) {
+		return s
+	}
 
-	b := isPalindromeV2(s)
-	fmt.Println(b)
+	totalLen := len(s)
+	viewLen := totalLen - 1
+	for viewLen > 0 {
+		for i := 0; i <= totalLen-viewLen; i++ {
+			viewStr := string(s[i : viewLen+i])
+			if isPalindrome(viewStr) {
+				return viewStr
+			}
+		}
+		viewLen--
+	}
+	return ""
+}
+
+func main() {
+	s := "akdasdffdsallkkk"
+	a := longestPalindrome(s)
+	fmt.Println(a)
 }
