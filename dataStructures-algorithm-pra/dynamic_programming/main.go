@@ -212,8 +212,18 @@ func longestPalindrome(s string) string {
 	return ""
 }
 
+// 买卖股票的最佳时机
+func maxProfit(prices []int) int {
+	last, profit := 0, 0
+	for i := 0; i < len(prices)-1; i++ {
+		last = intMax(0, last+prices[i+1]-prices[i])
+		profit = intMax(profit, last)
+	}
+	return profit
+}
+
 func main() {
-	s := "akdasdffdsallkkk"
-	a := longestPalindrome(s)
-	fmt.Println(a)
+	a := []int{7, 1, 5, 3, 6, 4}
+	b := maxProfit(a)
+	fmt.Println(b)
 }
